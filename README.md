@@ -10,12 +10,14 @@ is left empty, it falls back to the environment variable named by the
 
 ## Usage
 
+At least one target option (`--all`, `--js`, or `--py`) is required.
+
 ```powershell
 # Dry run: list what would be deleted, with size in MB, no changes made (both node_modules and .venv)
-python clean_node_modules.py --test
+python clean_node_modules.py --test --all
 
 # Real run: asks for confirmation, then deletes and logs each folder with its size
-python clean_node_modules.py
+python clean_node_modules.py --all
 
 # Only target node_modules folders
 python clean_node_modules.py --js
@@ -24,6 +26,9 @@ python clean_node_modules.py --test --javascript
 # Only target .venv folders
 python clean_node_modules.py --py
 python clean_node_modules.py --test --python
+
+# --js and --py together are equivalent to --all
+python clean_node_modules.py --test --js --py
 
 # Show help
 python clean_node_modules.py --help
@@ -36,18 +41,31 @@ python clean_node_modules.py --help
 | `--test`               | Dry run — only logs what would be deleted, nothing is removed    |
 | `--js`, `--javascript` | Only remove `node_modules` folders                                |
 | `--py`, `--python`     | Only remove `.venv` folders                                      |
+| `--all`                | Remove both `node_modules` and `.venv` folders (same as `--js --py`) |
 | `-h`, `--help`         | Show usage help                                                   |
 
-If neither `--js`/`--javascript` nor `--py`/`--python` is given, both folder
-types are targeted. Any unrecognised argument makes the script log an error
-and exit without running. Outside of `--test` mode, the script always asks
-for a `y`/`N` confirmation before deleting anything.
+At least one of `--all`, `--js`/`--javascript`, or `--py`/`--python` must be
+given, otherwise the script logs an error and exits without running. Any
+unrecognised argument does the same. Outside of `--test` mode, the script
+always asks for a `y`/`N` confirmation before deleting anything.
 
 ## Output
 
 Each folder is logged with its size in MB. At the end, the script prints the
 total space deleted (or that would be deleted in `--test` mode), formatted
 with thousands separators, e.g. `16,352.57 MB`.
+
+## Tests
+
+Unit tests live in `test_clean_node_modules.py` and use `pytest-mock` to
+simulate directory trees (`os.walk`, `os.path.getsize`, `shutil.rmtree`,
+`input`) — no real files or folders are touched.
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements-dev.txt
+pytest -v
+```
 
 ## Reminder: using the .venv
 
